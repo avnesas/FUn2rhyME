@@ -1,0 +1,239 @@
+<html><head><base href="https://fun2rhyme.com/rhymegame">
+<title>Fun 2 Rhyme Game - Test Your Rhyming Skills!</title>
+<style>
+  body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: linear-gradient(45deg, #FFD700, #FFFF00, #FFFFFF);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    animation: backgroundShift 15s ease infinite;
+  }
+  @keyframes backgroundShift {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
+  header {
+    background-color: #FFD700;
+    color: #000000;
+    text-align: center;
+    padding: 1em;
+    width: 100%;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  h1 {
+    margin: 0;
+    font-size: 3.5em;
+    text-shadow: 3px 3px #FFFF00, 6px 6px #FFFFFF;
+    letter-spacing: 2px;
+  }
+  main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2em;
+    text-align: center;
+  }
+  .game-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    padding: 2em;
+    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    max-width: 600px;
+    width: 100%;
+    margin-bottom: 2em;
+  }
+  .word-display {
+    font-size: 2.5em;
+    color: #000000;
+    margin-bottom: 1em;
+    animation: bounce 0.5s ease infinite alternate;
+  }
+  @keyframes bounce {
+    0% {transform: translateY(0);}
+    100% {transform: translateY(-10px);}
+  }
+  .input-container {
+    margin-bottom: 1em;
+  }
+  input[type="text"] {
+    font-size: 1.2em;
+    padding: 0.5em;
+    border: 2px solid #FFD700;
+    border-radius: 10px;
+    width: 60%;
+    max-width: 300px;
+  }
+  button {
+    background-color: #FFD700;
+    color: #000000;
+    border: none;
+    padding: 0.5em 1em;
+    font-size: 1.2em;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 0.5em;
+  }
+  button:hover {
+    background-color: #FFFF00;
+  }
+  .feedback {
+    font-size: 1.2em;
+    margin-top: 1em;
+    font-weight: bold;
+  }
+  .correct {
+    color: #008000;
+  }
+  .incorrect {
+    color: #FF0000;
+  }
+  .score {
+    font-size: 1.5em;
+    margin-top: 1em;
+    color: #000000;
+  }
+  .home-button {
+    background-color: #FFFF00;
+    color: #000000;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .home-button:hover {
+    background-color: #FFD700;
+    transform: translateY(-5px);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+  }
+  footer {
+    background-color: #FFD700;
+    color: #000000;
+    text-align: center;
+    padding: 1em;
+    width: 100%;
+  }
+  .correct-answers {
+    margin-top: 1em;
+    font-size: 1.1em;
+    color: #000000;
+    display: none;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Fun 2 Rhyme Game</h1>
+  </header>
+  
+  <main>
+    <div class="game-container">
+      <div class="word-display" id="wordDisplay">cat</div>
+      <div class="input-container">
+        <form method="GET" action="/rhymegame">
+          <input type="text" id="rhymeInput" name="rhyme" placeholder="Enter a rhyming word" required>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <div class="score" id="score">Score: 0</div>
+      <div class="correct-answers" id="correctAnswers"></div>
+    </div>
+    
+    <a href="https://fun2rhyme.com" class="home-button">Back to Home</a>
+  </main>
+
+  <footer>
+    <p>© 2023 Fun 2 Rhyme - Where words bounce and rhymes pounce!</p>
+  </footer>
+
+  <script>
+    const words = [
+      'cat', 'dog', 'tree', 'sun', 'moon', 'star',
+      'ball', 'book', 'house', 'mouse', 'car', 'far',
+      'light', 'night', 'song', 'long', 'blue', 'shoe',
+      'rain', 'train', 'king', 'ring', 'hat', 'bat'
+    ];
+    let currentWord = 'cat';
+    let score = 0;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    const rhymes = {
+      'cat': ['bat', 'hat', 'rat', 'mat', 'flat', 'sat'],
+      'dog': ['log', 'fog', 'bog', 'jog', 'frog', 'hog'],
+      'tree': ['bee', 'sea', 'key', 'flea', 'tea', 'me'],
+      'sun': ['fun', 'run', 'done', 'won', 'ton', 'bun'],
+      'moon': ['June', 'tune', 'spoon', 'soon', 'balloon', 'dune'],
+      'star': ['car', 'far', 'jar', 'bar', 'tar', 'spar'],
+      'ball': ['call', 'fall', 'hall', 'mall', 'tall', 'wall'],
+      'book': ['look', 'took', 'shook', 'cook', 'hook', 'nook'],
+      'house': ['mouse', 'grouse', 'spouse', 'douse', 'louse'],
+      'mouse': ['house', 'grouse', 'spouse', 'douse', 'louse'],
+      'car': ['far', 'jar', 'star', 'bar', 'tar', 'spar'],
+      'far': ['car', 'jar', 'star', 'bar', 'tar', 'spar'],
+      'light': ['night', 'sight', 'bright', 'flight', 'tight', 'might'],
+      'night': ['light', 'sight', 'bright', 'flight', 'tight', 'might'],
+      'song': ['long', 'strong', 'wrong', 'along', 'belong', 'throng'],
+      'long': ['song', 'strong', 'wrong', 'along', 'belong', 'throng'],
+      'blue': ['shoe', 'true', 'glue', 'too', 'you', 'new'],
+      'shoe': ['blue', 'true', 'glue', 'too', 'you', 'new'],
+      'rain': ['train', 'pain', 'gain', 'main', 'stain', 'drain'],
+      'train': ['rain', 'pain', 'gain', 'main', 'stain', 'drain'],
+      'king': ['ring', 'sing', 'wing', 'bring', 'spring', 'sting'],
+      'ring': ['king', 'sing', 'wing', 'bring', 'spring', 'sting'],
+      'hat': ['cat', 'bat', 'rat', 'mat', 'flat', 'sat'],
+      'bat': ['cat', 'hat', 'rat', 'mat', 'flat', 'sat']
+    };
+
+    function newWord() {
+      currentWord = words[Math.floor(Math.random() * words.length)];
+      document.getElementById('wordDisplay').textContent = currentWord;
+      document.getElementById('correctAnswers').style.display = 'none';
+      attempts = 0;
+    }
+
+    function checkRhyme(input) {
+      if (rhymes[currentWord].includes(input.toLowerCase())) {
+        score++;
+        document.getElementById('feedback').textContent = 'Correct! Great rhyme!';
+        document.getElementById('feedback').className = 'feedback correct';
+        newWord();
+      } else {
+        attempts++;
+        if (attempts >= maxAttempts) {
+          document.getElementById('feedback').textContent = `Oops! Out of attempts. The correct answers were: ${rhymes[currentWord].join(', ')}`;
+          document.getElementById('feedback').className = 'feedback incorrect';
+          document.getElementById('correctAnswers').textContent = `Correct answers: ${rhymes[currentWord].join(', ')}`;
+          document.getElementById('correctAnswers').style.display = 'block';
+          newWord();
+        } else {
+          document.getElementById('feedback').textContent = `Oops! Try again. Attempts left: ${maxAttempts - attempts}`;
+          document.getElementById('feedback').className = 'feedback incorrect';
+        }
+      }
+      
+      document.getElementById('score').textContent = `Score: ${score}`;
+    }
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const input = document.getElementById('rhymeInput').value;
+      checkRhyme(input);
+      document.getElementById('rhymeInput').value = '';
+    });
+
+    newWord();
+  </script>
+</body></html>
